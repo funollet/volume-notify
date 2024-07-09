@@ -9,28 +9,43 @@ import (
 	"strings"
 )
 
-func run(cmd string) (out []byte, err error) {
+func run(cmd string) (result string, err error) {
+  var out []byte
 	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
 		log.Println(string(out))
 	}
-	return out, err
+	return string(out), err
 }
 
-func getVolume() (volume int, err error) {
-	// Get the current volume
-	var cmdOut []byte
-	cmdOut, err = run("pactl get-sink-volume @DEFAULT_SINK@")
-	if err != nil {
-		return 0, err
-	}
-	parsed := strings.Split(string(cmdOut), "\n")[0]
+// type runShell struct {
+//   command string
+//   process func()
+// }
+
+// getVolume := runShell{
+//   "command": "pactl get-sink-mute @DEFAULT_SINK@",
+//   "process": isMutedProcess
+// }
+
+func processGetVolume(text string) (volume int, err error) {
+	parsed := strings.Split(text, "\n")[0]
 	parsedd := strings.Split(parsed, "/")[1]
 	parseddd := strings.ReplaceAll(parsedd, "%", "")
 	return strconv.Atoi(strings.TrimSpace(parseddd))
 }
 
-func notifyVolumeOsd(percentage int, muted bool, icon string) (out []byte, err error) {
+func getVolume() (volume int, err error) {
+	// Get the current volume
+	var cmdOut string
+	cmdOut, err = run("pactl get-sink-volume @DEFAULT_SINK@")
+	if err != nil {
+		return 0, err
+	}
+  return processGetVolume(cmdOut)
+}
+
+func notifyVolumeOsd(percentage int, muted bool, icon string) (out string, err error) {
 	timeout := 1000
 
 	var iconWithDefaults string
@@ -62,23 +77,22 @@ func notifyVolumeOsd(percentage int, muted bool, icon string) (out []byte, err e
 	// notify-send raises an error if it receives an empty body
 	cmd += "    ' '"
 
-	fmt.Println(cmd)
 	return run(cmd)
 }
 
 func main() {
-	out, err := notifyVolumeOsd(50, false, "")
-	// out, err := notifyVolumeOsd(-1, true, "")
-	if err != nil {
-		log.Println(string(out))
-		os.Exit(1)
-	}
-
-	// volume, err := getVolume()
+	// out, err := notifyVolumeOsd(50, false, "")
+	// // out, err := notifyVolumeOsd(-1, true, "")
 	// if err != nil {
+	// 	log.Println(string(out))
 	// 	os.Exit(1)
 	// }
-	// fmt.Println(volume)
+
+	volume, err := getVolume()
+	if err != nil {
+		os.Exit(1)
+	}
+	fmt.Println(volume)
 
 	fmt.Println()
 }
