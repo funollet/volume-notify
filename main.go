@@ -10,7 +10,7 @@ import (
 )
 
 func run(cmd string) (result string, err error) {
-  var out []byte
+	var out []byte
 	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
 		log.Println(string(out))
@@ -18,31 +18,28 @@ func run(cmd string) (result string, err error) {
 	return string(out), err
 }
 
-// type runShell struct {
-//   command string
-//   process func()
-// }
-
-// getVolume := runShell{
-//   "command": "pactl get-sink-mute @DEFAULT_SINK@",
-//   "process": isMutedProcess
-// }
-
-func processGetVolume(text string) (volume int, err error) {
-	parsed := strings.Split(text, "\n")[0]
-	parsedd := strings.Split(parsed, "/")[1]
-	parseddd := strings.ReplaceAll(parsedd, "%", "")
-	return strconv.Atoi(strings.TrimSpace(parseddd))
+type shell struct {
+  command string
+  process func(string) (string)
 }
 
-func getVolume() (volume int, err error) {
-	// Get the current volume
-	var cmdOut string
-	cmdOut, err = run("pactl get-sink-volume @DEFAULT_SINK@")
-	if err != nil {
-		return 0, err
-	}
-  return processGetVolume(cmdOut)
+func (sh shell) do() (result string, err error) {
+  out, err := run(sh.command)
+  if err != nil {
+    return "", err
+  }
+  result = sh.process(out)
+  return result, err
+}
+
+func processGetVolume(text string) (volume string) {
+	lines := strings.Split(text, "\n")[0]
+	fields := strings.Split(lines, "/")
+  if len(fields) < 2 {
+    return ""
+  }
+	value := strings.ReplaceAll(fields[1], "%", "")
+	return strings.TrimSpace(value)
 }
 
 func notifyVolumeOsd(percentage int, muted bool, icon string) (out string, err error) {
@@ -81,18 +78,24 @@ func notifyVolumeOsd(percentage int, muted bool, icon string) (out string, err e
 }
 
 func main() {
-	// out, err := notifyVolumeOsd(50, false, "")
-	// // out, err := notifyVolumeOsd(-1, true, "")
-	// if err != nil {
-	// 	log.Println(string(out))
-	// 	os.Exit(1)
-	// }
-
-	volume, err := getVolume()
+  getVolume := shell{
+    command: "pactl get-sink-volume @DEFAULT_SINK@",
+    process: processGetVolume,
+  }
+  volumeStr, err := getVolume.do()
 	if err != nil {
 		os.Exit(1)
 	}
-	fmt.Println(volume)
+
+  var volume int
+  volume, err = strconv.Atoi(volumeStr)
+	out, err := notifyVolumeOsd(volume, false, "")
+	// out, err := notifyVolumeOsd(-1, true, "")
+	if err != nil {
+		log.Println(out)
+		os.Exit(1)
+	}
+
 
 	fmt.Println()
 }
