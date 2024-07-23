@@ -1,8 +1,8 @@
 package notify
 
 import (
-  "fmt"
-  "funollet/volume-notify/internal/shell"
+	"fmt"
+	"funollet/volume-notify/internal/shell"
 )
 
 func NotifyVolumeOsd(percentage int, muted bool, icon string) (out string, err error) {
@@ -39,4 +39,3 @@ func NotifyVolumeOsd(percentage int, muted bool, icon string) (out string, err e
 
 	return shell.Run(cmd)
 }
-
