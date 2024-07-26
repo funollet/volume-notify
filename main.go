@@ -8,17 +8,31 @@ import (
 )
 
 func main() {
+	args := os.Args[1:]
+	if len(args) < 1 {
+		log.Println("please provide a value")
+		os.Exit(1)
+	}
+
+	switch args[0] {
+	case "up":
+		errSetVolume := volume.SetVolume("+1%")
+		if errSetVolume != nil {
+			os.Exit(1)
+		}
+	case "down":
+		errSetVolume := volume.SetVolume("-1%")
+		if errSetVolume != nil {
+			os.Exit(1)
+		}
+	case "mute":
+		volume.ToggleMute()
+	}
+
 	actualVolume, err := volume.GetVolume()
 	if err != nil {
 		os.Exit(1)
 	}
-
-	errSetVolume := volume.SetVolume("+10%")
-	if errSetVolume != nil {
-		os.Exit(1)
-	}
-
-	volume.ToggleMute()
 
 	muted, errMute := volume.GetMute()
 	if errMute != nil {
@@ -26,7 +40,6 @@ func main() {
 	}
 
 	out, errNotify := notify.NotifyVolumeOsd(actualVolume, muted, "")
-	// out, errNotify := notify.NotifyVolumeOsd(-1, true, "")
 	if errNotify != nil {
 		log.Println(out)
 		os.Exit(1)

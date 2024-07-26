@@ -28,9 +28,7 @@ func NotifyVolumeOsd(percentage int, muted bool, icon string) (out string, err e
     --icon %s \
   `, timeout, iconWithDefaults)
 
-	// The hint is only shown if percentage is in the 0..100 range.
-	switch {
-	case percentage > 0 && percentage <= 100:
+	if !muted {
 		cmd += fmt.Sprintf("  --hint int:value:%d \\\n", percentage)
 	}
 
