@@ -13,8 +13,11 @@ func main() {
 		log.Println("Error: can't get volume")
 		os.Exit(1)
 	}
+
+	muted, _ := volume.GetMute()
+
 	var out string
-	out, err = notify.NotifyVolumeOsd(actualVolume, false, "")
+	out, err = notify.NotifyVolumeOsd(actualVolume, muted, "")
 	// out, err := notify.NotifyVolumeOsd(-1, true, "")
 	if err != nil {
 		log.Println(out)
