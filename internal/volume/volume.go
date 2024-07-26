@@ -1,35 +1,27 @@
 package volume
 
 import (
+	"errors"
 	"funollet/volume-notify/internal/shell"
-	"strconv"
 	"strings"
 )
 
-func processGet(text string) (volume string) {
-  // Example input to parse:
-  //
-  // volume: Volume: front-left: 30146 /  46% / -20.24 dB,   front-right: 30146 /  46% / -20.24 dB
-  //         balance 0.00
-
-	lines := strings.Split(text, "\n")[0]
-	fields := strings.Split(lines, "/")
-  if len(fields) < 2 {
-    return ""
-  }
+func processGetVolume(text string) (volume string, err error) {
+	lines := strings.Split(strings.TrimSpace(text), "\n")
+	firstLine := lines[0]
+	fields := strings.Split(firstLine, "/")
+	if len(fields) < 2 {
+		return "", errors.New("invalid commmand output")
+	}
 	value := strings.ReplaceAll(fields[1], "%", "")
-	return strings.TrimSpace(value)
+	return strings.TrimSpace(value), nil
 }
 
-func Get() (volume int, err error){
-  runner := shell.Shell{
-    Command: "pactl get-sink-volume @DEFAULT_SINK@",
-    Process: processGet,
-  }
-  out, err := runner.Do()
-	if err != nil {
-		return 0, err
+func GetVolume() (volume int, err error) {
+	runner := shell.Shell{
+		Command: "pactl get-sink-volume @DEFAULT_SINK@",
+		Process: processGetVolume,
 	}
-  volume, err = strconv.Atoi(out)
-  return volume, err
+	volume, err = runner.DoInt()
+	return volume, err
 }

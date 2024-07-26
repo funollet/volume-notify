@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	actualVolume, err := volume.Get()
+	actualVolume, err := volume.GetVolume()
 	if err != nil {
 		log.Println("Error: can't get volume")
 		os.Exit(1)
