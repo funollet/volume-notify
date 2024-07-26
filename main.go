@@ -10,16 +10,24 @@ import (
 func main() {
 	actualVolume, err := volume.GetVolume()
 	if err != nil {
-		log.Println("Error: can't get volume")
 		os.Exit(1)
 	}
 
-	muted, _ := volume.GetMute()
+	errSetVolume := volume.SetVolume("+10%")
+	if errSetVolume != nil {
+		os.Exit(1)
+	}
 
-	var out string
-	out, err = notify.NotifyVolumeOsd(actualVolume, muted, "")
-	// out, err := notify.NotifyVolumeOsd(-1, true, "")
-	if err != nil {
+	volume.ToggleMute()
+
+	muted, errMute := volume.GetMute()
+	if errMute != nil {
+		os.Exit(1)
+	}
+
+	out, errNotify := notify.NotifyVolumeOsd(actualVolume, muted, "")
+	// out, errNotify := notify.NotifyVolumeOsd(-1, true, "")
+	if errNotify != nil {
 		log.Println(out)
 		os.Exit(1)
 	}
