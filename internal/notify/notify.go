@@ -20,7 +20,7 @@ func NotifyVolumeOsd(percentage int, muted bool, icon string) (out string, err e
 	}
 
 	cmd := fmt.Sprintf(`notify-send \
-    --app-name volume-osd \
+    --app-name volume-notify \
     --replace-id 2593 \
     --transient \
     --expire-time %d \
