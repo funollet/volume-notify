@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"funollet/volume-notify/internal/notify"
 	"funollet/volume-notify/internal/volume"
 	"log"
@@ -8,20 +10,25 @@ import (
 )
 
 func main() {
-	args := os.Args[1:]
-	if len(args) < 1 {
+	var step int
+	flag.IntVar(&step, "step", 1, "volume change step")
+	flag.Parse()
+	if len(flag.Args()) < 1 {
 		log.Println("please provide a value")
 		os.Exit(1)
 	}
 
-	switch args[0] {
+	switch flag.Arg(0) {
 	case "up":
-		errSetVolume := volume.SetVolume("+1%")
+		change := fmt.Sprintf("+%d%%", step)
+		log.Println(change)
+		errSetVolume := volume.SetVolume(change)
 		if errSetVolume != nil {
 			os.Exit(1)
 		}
 	case "down":
-		errSetVolume := volume.SetVolume("-1%")
+		change := fmt.Sprintf("-%d%%", step)
+		errSetVolume := volume.SetVolume(change)
 		if errSetVolume != nil {
 			os.Exit(1)
 		}
@@ -29,7 +36,7 @@ func main() {
 		volume.ToggleMute()
 	}
 
-	actualVolume, err := volume.GetVolume()
+	volumePercent, err := volume.GetVolume()
 	if err != nil {
 		os.Exit(1)
 	}
@@ -39,7 +46,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	out, errNotify := notify.NotifyVolumeOsd(actualVolume, muted, "")
+	out, errNotify := notify.NotifyVolumeOsd(volumePercent, muted, "")
 	if errNotify != nil {
 		log.Println(out)
 		os.Exit(1)
