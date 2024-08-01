@@ -1,11 +1,10 @@
-package notify
+package main
 
 import (
 	"fmt"
-	"funollet/volume-notify/internal/shell"
 )
 
-func NotifyVolumeOsd(percentage int, muted bool, icon string) (out string, err error) {
+func notifyVolumeOsd(percentage int, muted bool, icon string) (out string, err error) {
 	timeout := 1000
 
 	var iconWithDefaults string
@@ -35,5 +34,5 @@ func NotifyVolumeOsd(percentage int, muted bool, icon string) (out string, err e
 	// notify-send raises an error if it receives an empty body
 	cmd += "    ' '"
 
-	return shell.Run(cmd)
+	return run(cmd)
 }

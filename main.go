@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"funollet/volume-notify/internal/notify"
-	"funollet/volume-notify/internal/volume"
 	"github.com/spf13/pflag"
 	"log"
 	"os"
@@ -44,31 +42,31 @@ Options:
 	switch action {
 	case "up":
 		change := fmt.Sprintf("+%d%%", *step)
-		err := volume.SetVolume(change)
+		err := setVolume(change)
 		if err != nil {
 			os.Exit(1)
 		}
 	case "down":
 		change := fmt.Sprintf("-%d%%", *step)
-		err := volume.SetVolume(change)
+		err := setVolume(change)
 		if err != nil {
 			os.Exit(1)
 		}
 	case "mute":
-		volume.ToggleMute()
+		toggleMute()
 	}
 
-	volumePercent, err := volume.GetVolume()
+	volumePercent, err := getVolume()
 	if err != nil {
 		os.Exit(1)
 	}
 
-	muted, errMute := volume.GetMute()
+	muted, errMute := getMute()
 	if errMute != nil {
 		os.Exit(1)
 	}
 
-	out, errNotify := notify.NotifyVolumeOsd(volumePercent, muted, "")
+	out, errNotify := notifyVolumeOsd(volumePercent, muted, "")
 	if errNotify != nil {
 		log.Println(out)
 		os.Exit(1)
