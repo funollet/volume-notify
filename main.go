@@ -7,7 +7,13 @@ import (
 	"os"
 )
 
-func main() {
+type Config struct {
+	action string
+	step   int
+	help   bool
+}
+
+func parseFlags() Config {
 	usage_header := `Changes volume up/down/muted and sends a desktop notification.
 
 Usage: volume-notify [OPTION]... <up|down|mute>
@@ -33,21 +39,32 @@ Options:
 		os.Exit(0)
 	}
 
-	if pflag.NArg() < 1 {
-		log.Println("please provide a value")
+	action := pflag.Arg(0)
+	if action == "" {
+		pflag.Usage()
 		os.Exit(1)
 	}
-	action := pflag.Arg(0)
 
-	switch action {
+	return Config{
+		action: action,
+		step:   *step,
+		help:   *help,
+	}
+
+}
+
+func main() {
+	config := parseFlags()
+
+	switch config.action {
 	case "up":
-		change := fmt.Sprintf("+%d%%", *step)
+		change := fmt.Sprintf("+%d%%", config.step)
 		err := setVolume(change)
 		if err != nil {
 			os.Exit(1)
 		}
 	case "down":
-		change := fmt.Sprintf("-%d%%", *step)
+		change := fmt.Sprintf("-%d%%", config.step)
 		err := setVolume(change)
 		if err != nil {
 			os.Exit(1)
