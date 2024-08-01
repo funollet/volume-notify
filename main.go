@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/pflag"
 	"log"
 	"os"
+
+	"github.com/spf13/pflag"
 )
 
 type Config struct {
